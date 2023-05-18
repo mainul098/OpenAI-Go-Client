@@ -10,24 +10,39 @@ import (
 	"os"
 )
 
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
 type OpenAIRequest struct {
-	Prompt string `json:"prompt"`
+	Model    string    `json:"model"`
+	Messages []Message `json:"messages"`
 }
 
 type OpenAIResponse struct {
 	Choices []struct {
-		Text string `json:"text"`
+		Message Message `json:"message"`
 	} `json:"choices"`
 }
 
 func main() {
 	apiKey := os.Getenv("OPENAI_API_KEY")
 
-	endpoint := "https://api.openai.com/v1/engines/davinci-codex/completions"
+	endpoint := "https://api.openai.com/v1/chat/completions"
 
-	prompt := "Hello, World!"
+	openApiRequest := OpenAIRequest{
+		Model: "gpt-3.5-turbo",
+		Messages: []Message{
+			{
+				Role:    "user",
+				Content: "Hello!",
+			},
+		},
+	}
 
-	reqBody, err := json.Marshal(OpenAIRequest{Prompt: prompt})
+	reqBody, err := json.Marshal(openApiRequest)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,5 +75,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(openAIResponse.Choices[0].Text)
+	fmt.Println(openAIResponse.Choices[0].Message.Content)
 }
